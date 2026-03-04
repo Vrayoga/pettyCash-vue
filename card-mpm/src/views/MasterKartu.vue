@@ -4,6 +4,7 @@ import HeaderComponent from '@/components/Header/HeaderComponent.vue'
 import FooterComponent from '@/components/Footer/FooterComponent.vue'
 import AppButton from '@/components/Button/AppButton.vue'
 import { useSessionStore } from '@/helper/sessionStore'
+import { computed } from 'vue'
 
 const sessionStore = useSessionStore();
 // Set mock data so HeaderComponent has something to show
@@ -15,7 +16,7 @@ sessionStore.setSession({
     SITE_ID_MAPPING: 'S01'
 });
 
-// Data Dummy Sesuai Gambar Figma
+// Data Dummy
 const cards = ref([
     {
         npk: '100234',
@@ -58,6 +59,216 @@ const cards = ref([
         sisaSaldo: 'Rp 10.000.000',
         tipeKartu: 'Credit Card',
         status: 'Active'
+    },
+    {
+        npk: '100237',
+        namaPic: 'Dewi Lestari',
+        department: 'Finance',
+        divisi: 'Tax',
+        nomorRekening: '5678901234',
+        namaBank: 'BRI',
+        expiredDate: '2025-10-01',
+        limitSaldo: 'Rp 8.000.000',
+        saldoTerpakai: 'Rp 2.000.000',
+        sisaSaldo: 'Rp 6.000.000',
+        tipeKartu: 'Card',
+        status: 'Active'
+    },
+    {
+        npk: '100238',
+        namaPic: 'Rizky Fadillah',
+        department: 'IT',
+        divisi: 'Infrastructure',
+        nomorRekening: '6789012345',
+        namaBank: 'BCA',
+        expiredDate: '2026-05-01',
+        limitSaldo: 'Rp 12.000.000',
+        saldoTerpakai: 'Rp 6.000.000',
+        sisaSaldo: 'Rp 6.000.000',
+        tipeKartu: 'Non Card',
+        status: 'Active'
+    },
+    {
+        npk: '100239',
+        namaPic: 'Indah Permata',
+        department: 'Marketing',
+        divisi: 'Promotions',
+        nomorRekening: '7890123456',
+        namaBank: 'Mandiri',
+        expiredDate: '2027-01-01',
+        limitSaldo: 'Rp 20.000.000',
+        saldoTerpakai: 'Rp 10.000.000',
+        sisaSaldo: 'Rp 10.000.000',
+        tipeKartu: 'Credit Card',
+        status: 'Active'
+    },
+    {
+        npk: '100240',
+        namaPic: 'Agus Setiawan',
+        department: 'Sales',
+        divisi: 'Corporate Sales',
+        nomorRekening: '8901234567',
+        namaBank: 'BCA',
+        expiredDate: '2026-11-01',
+        limitSaldo: 'Rp 15.000.000',
+        saldoTerpakai: 'Rp 12.000.000',
+        sisaSaldo: 'Rp 3.000.000',
+        tipeKartu: 'Card',
+        status: 'Inactive'
+    },
+    {
+        npk: '100241',
+        namaPic: 'Fitriani',
+        department: 'HR',
+        divisi: 'Recruitment',
+        nomorRekening: '9012345678',
+        namaBank: 'BNI',
+        expiredDate: '2025-08-01',
+        limitSaldo: 'Rp 5.000.000',
+        saldoTerpakai: 'Rp 1.500.000',
+        sisaSaldo: 'Rp 3.500.000',
+        tipeKartu: 'Non Card',
+        status: 'Active'
+    },
+    {
+        npk: '100242',
+        namaPic: 'Hendro Siswanto',
+        department: 'Operation',
+        divisi: 'Maintenance',
+        nomorRekening: '0123456789',
+        namaBank: 'BRI',
+        expiredDate: '2026-03-01',
+        limitSaldo: 'Rp 10.000.000',
+        saldoTerpakai: 'Rp 8.000.000',
+        sisaSaldo: 'Rp 2.000.000',
+        tipeKartu: 'Card',
+        status: 'Active'
+    },
+    {
+        npk: '100243',
+        namaPic: 'Maya Sari',
+        department: 'Finance',
+        divisi: 'Treasury',
+        nomorRekening: '1122334455',
+        namaBank: 'Mandiri',
+        expiredDate: '2027-12-01',
+        limitSaldo: 'Rp 25.000.000',
+        saldoTerpakai: 'Rp 5.000.000',
+        sisaSaldo: 'Rp 20.000.000',
+        tipeKartu: 'Credit Card',
+        status: 'Active'
+    },
+    {
+        npk: '100244',
+        namaPic: 'Doni Saputra',
+        department: 'IT',
+        divisi: 'Software Development',
+        nomorRekening: '2233445566',
+        namaBank: 'BCA',
+        expiredDate: '2026-07-01',
+        limitSaldo: 'Rp 10.000.000',
+        saldoTerpakai: 'Rp 2.000.000',
+        sisaSaldo: 'Rp 8.000.000',
+        tipeKartu: 'Non Card',
+        status: 'Active'
+    },
+    {
+        npk: '100245',
+        namaPic: 'Nina Marlina',
+        department: 'Marketing',
+        divisi: 'Digital Marketing',
+        nomorRekening: '3344556677',
+        namaBank: 'BNI',
+        expiredDate: '2025-11-01',
+        limitSaldo: 'Rp 12.000.000',
+        saldoTerpakai: 'Rp 4.000.000',
+        sisaSaldo: 'Rp 8.000.000',
+        tipeKartu: 'Card',
+        status: 'Active'
+    },
+    {
+        npk: '100246',
+        namaPic: 'Reza Pahlevi',
+        department: 'Sales',
+        divisi: 'Retail Sales',
+        nomorRekening: '4455667788',
+        namaBank: 'BRI',
+        expiredDate: '2026-10-01',
+        limitSaldo: 'Rp 8.000.000',
+        saldoTerpakai: 'Rp 7.500.000',
+        sisaSaldo: 'Rp 500.000',
+        tipeKartu: 'Non Card',
+        status: 'Inactive'
+    },
+    {
+        npk: '100247',
+        namaPic: 'Lina Marliana',
+        department: 'HR',
+        divisi: 'Payroll',
+        nomorRekening: '5566778899',
+        namaBank: 'BCA',
+        expiredDate: '2027-02-01',
+        limitSaldo: 'Rp 15.000.000',
+        saldoTerpakai: 'Rp 10.000.000',
+        sisaSaldo: 'Rp 5.000.000',
+        tipeKartu: 'Credit Card',
+        status: 'Active'
+    },
+    {
+        npk: '100248',
+        namaPic: 'Ahmad Fauzi',
+        department: 'Operation',
+        divisi: 'Supply Chain',
+        nomorRekening: '6677889900',
+        namaBank: 'Mandiri',
+        expiredDate: '2026-04-01',
+        limitSaldo: 'Rp 20.000.000',
+        saldoTerpakai: 'Rp 18.000.000',
+        sisaSaldo: 'Rp 2.000.000',
+        tipeKartu: 'Card',
+        status: 'Active'
+    },
+    {
+        npk: '100249',
+        namaPic: 'Rini Yulianti',
+        department: 'Finance',
+        divisi: 'Audit',
+        nomorRekening: '7788990011',
+        namaBank: 'BNI',
+        expiredDate: '2025-09-01',
+        limitSaldo: 'Rp 10.000.000',
+        saldoTerpakai: 'Rp 3.000.000',
+        sisaSaldo: 'Rp 7.000.000',
+        tipeKartu: 'Non Card',
+        status: 'Active'
+    },
+    {
+        npk: '100250',
+        namaPic: 'Eko Prasetyo',
+        department: 'IT',
+        divisi: 'Network',
+        nomorRekening: '8899001122',
+        namaBank: 'BRI',
+        expiredDate: '2026-12-01',
+        limitSaldo: 'Rp 15.000.000',
+        saldoTerpakai: 'Rp 5.000.000',
+        sisaSaldo: 'Rp 10.000.000',
+        tipeKartu: 'Credit Card',
+        status: 'Inactive'
+    },
+    {
+        npk: '100251',
+        namaPic: 'Tuti Wulandari',
+        department: 'Marketing',
+        divisi: 'Public Relations',
+        nomorRekening: '9900112233',
+        namaBank: 'BCA',
+        expiredDate: '2027-05-01',
+        limitSaldo: 'Rp 8.000.000',
+        saldoTerpakai: 'Rp 2.500.000',
+        sisaSaldo: 'Rp 5.500.000',
+        tipeKartu: 'Card',
+        status: 'Active'
     }
 ])
 
@@ -66,16 +277,53 @@ const cards = ref([
 const currentPage = ref(1)
 const itemsPerPage = ref(5) // adjust items per page here
 
-import { computed } from 'vue'
+
+
+const filterPic = ref('')
+const filterNpk = ref('')
+const filterRekening = ref('')
+const filterStatus = ref('')
+const filterTipeOptions = ref('')
+
+const appliedFilters = ref({
+    pic: '',
+    npk: '',
+    rekening: '',
+    status: '',
+    tipe: ''
+})
+
+const applyFilter = () => {
+    appliedFilters.value = {
+        pic: filterPic.value,
+        npk: filterNpk.value,
+        rekening: filterRekening.value,
+        status: filterStatus.value,
+        tipe: filterTipeOptions.value
+    }
+    currentPage.value = 1
+}
+
+const filteredCards = computed(() => {
+    return cards.value.filter(card => {
+        const matchPic = appliedFilters.value.pic === '' || card.namaPic === appliedFilters.value.pic
+        const matchNpk = appliedFilters.value.npk === '' || card.npk === appliedFilters.value.npk
+        const matchRekening = appliedFilters.value.rekening === '' || card.nomorRekening === appliedFilters.value.rekening
+        const matchStatus = appliedFilters.value.status === '' || card.status === appliedFilters.value.status
+        const matchTipe = appliedFilters.value.tipe === '' || card.tipeKartu === appliedFilters.value.tipe
+        
+        return matchPic && matchNpk && matchRekening && matchStatus && matchTipe
+    })
+})
 
 const totalPages = computed(() => {
-    return Math.ceil(cards.value.length / itemsPerPage.value)
+    return Math.ceil(filteredCards.value.length / itemsPerPage.value)
 })
 
 const paginatedCards = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value
     const end = start + itemsPerPage.value
-    return cards.value.slice(start, end)
+    return filteredCards.value.slice(start, end)
 })
 
 const prevPage = () => {
@@ -90,11 +338,9 @@ const goToPage = (page) => {
     currentPage.value = page
 }
 
-const filterPic = ref('')
-const filterNpk = ref('')
-const filterRekening = ref('')
-const filterStatus = ref('')
-const filterTipeOptions = ref('')
+const uniquePics = computed(() => [...new Set(cards.value.map(c => c.namaPic))].sort())
+const uniqueNpks = computed(() => [...new Set(cards.value.map(c => c.npk))].sort())
+const uniqueRekenings = computed(() => [...new Set(cards.value.map(c => c.nomorRekening))].sort())
 
 // Form Modal State
 const showModal = ref(false)
@@ -128,17 +374,36 @@ const closeModal = () => {
     showModal.value = false
 }
 
-const handleSimpan = () => {
-    if (isEditMode.value && editIndex.value !== -1) {
-        // Update data
-        cards.value[editIndex.value] = { ...formData.value }
-        alert("Data berhasil diperbarui!")
-    } else {
-        // Tambah data baru
-        cards.value.push({ ...formData.value })
-        alert("Data berhasil disimpan!")
+import { apiSelf } from '@/helper/ourAxios'
+
+const handleSimpan = async () => {
+    try {
+        if (isEditMode.value && editIndex.value !== -1) {
+
+            const response = await apiSelf.put(`/api/petty-cash/update/${formData.value.npk}`, formData.value)
+            
+            if (response.data && response.status === 200) {
+                cards.value[editIndex.value] = { ...formData.value }
+                alert("Data berhasil diperbarui!")
+            } else {
+                alert("Gagal memperbarui data dari server!")
+            }
+        } else {
+
+            const response = await apiSelf.post('/api/petty-cash/create', formData.value)
+            
+            if (response.data && response.status === 200) {
+                cards.value.push({ ...formData.value })
+                alert("Data berhasil disimpan!")
+            } else {
+                alert("Gagal menyimpan data ke server!")
+            }
+        }
+        closeModal()
+    } catch (error) {
+        console.error("Error saving data:", error)
+        alert("Terjadi kesalahan saat menghubungi server!")
     }
-    closeModal()
 }
 
 const handleEdit = (npk) => {
@@ -152,7 +417,59 @@ const handleEdit = (npk) => {
 }
 
 const handleExport = () => {
-   alert("Mode Export to Excel") 
+    let dataToExport = cards.value;
+    
+    // Cek apakah ada filter yang sedang aktif
+    if (filteredCards.value.length !== cards.value.length) {
+        const exportFiltered = confirm("Anda sedang menggunakan filter.\nKlik OK untuk export HANYA data yang difilter.\nKlik Cancel untuk export SEMUA data.");
+        if (exportFiltered) {
+            dataToExport = filteredCards.value;
+        }
+    }
+
+    if (dataToExport.length === 0) {
+        alert("Tidak ada data untuk diexport!");
+        return;
+    }
+
+    // Persiapkan CSV Header
+    const headers = [
+        "NPK", "Nama PIC", "Department", "Divisi", "Nomor Rekening",
+        "Nama Bank", "Expired Date", "Limit Saldo", "Saldo Terpakai",
+        "Sisa Saldo", "Tipe Kartu", "Status"
+    ];
+
+    // Persiapkan CSV Rows
+    const rows = dataToExport.map(item => [
+        `"${item.npk}"`, 
+        `"${item.namaPic}"`, 
+        `"${item.department}"`, 
+        `"${item.divisi}"`, 
+        `"${item.nomorRekening}"`, 
+        `"${item.namaBank}"`, 
+        `"${item.expiredDate}"`, 
+        `"${item.limitSaldo}"`, 
+        `"${item.saldoTerpakai}"`, 
+        `"${item.sisaSaldo}"`, 
+        `"${item.tipeKartu}"`, 
+        `"${item.status}"`
+    ]);
+
+  
+    let csvContent = headers.join(";") + "\n" + rows.map(e => e.join(";")).join("\n");
+
+    // Supaya karakter spesial terbaca dengan baik di excel (BOM)
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Trigger Download
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Master_Kartu_Petty_Cash_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 const handleHapus = (npk) => {
@@ -190,21 +507,19 @@ const handleHapus = (npk) => {
                         <div class="col-12 col-md filter-col">
                             <select v-model="filterPic" class="form-select w-100 form-select-sm">
                                 <option value="">All PIC</option>
-                                <option value="Andi Pratama">Andi Pratama</option>
-                                <option value="Siti Rahma">Siti Rahma</option>
+                                <option v-for="pic in uniquePics" :key="pic" :value="pic">{{ pic }}</option>
                             </select>
                         </div>
                         <div class="col-12 col-md filter-col">
                             <select v-model="filterNpk" class="form-select w-100 form-select-sm">
                                 <option value="">All NPK</option>
-                                <option value="100234">100234</option>
-                                <option value="100235">100235</option>
+                                <option v-for="npk in uniqueNpks" :key="npk" :value="npk">{{ npk }}</option>
                             </select>
                         </div>
                         <div class="col-12 col-md filter-col">
                             <select v-model="filterRekening" class="form-select w-100 form-select-sm">
                                 <option value="">All Nomor Rekening</option>
-                                <option value="1234567890">1234567890</option>
+                                <option v-for="req in uniqueRekenings" :key="req" :value="req">{{ req }}</option>
                             </select>
                         </div>
                         <div class="col-12 col-md filter-col">
@@ -223,7 +538,7 @@ const handleHapus = (npk) => {
                             </select>
                         </div>
                         <div class="col-12 col-md-auto mt-3 mt-md-0 d-flex align-items-stretch">
-                            <button class="btn btn-warning text-white btn-sm w-100 filter-btn shadow-sm d-flex align-items-center justify-content-center m-0" style="background-color: #f26f21; border-color: #f26f21;">
+                            <button @click="applyFilter" class="btn btn-warning text-white btn-sm w-100 filter-btn shadow-sm d-flex align-items-center justify-content-center m-0" style="background-color: #f26f21; border-color: #f26f21;">
                                 <i class="bi bi-search me-1"></i> Filter
                             </button>
                         </div>
@@ -284,9 +599,12 @@ const handleHapus = (npk) => {
                 <!-- PAGINATION CONTROLS -->
                 <div class="card-footer bg-white border-top-0 py-3 px-4 d-flex justify-content-between align-items-center">
                     <span class="text-secondary small">
-                        Menampilkan {{ ((currentPage - 1) * itemsPerPage) + 1 }} - 
-                        {{ Math.min(currentPage * itemsPerPage, cards.length) }}
-                        dari {{ cards.length }} hasil
+                        <span v-if="filteredCards.length > 0">
+                            Menampilkan {{ ((currentPage - 1) * itemsPerPage) + 1 }} - 
+                            {{ Math.min(currentPage * itemsPerPage, filteredCards.length) }}
+                            dari {{ filteredCards.length }} hasil
+                        </span>
+                        <span v-else>0 hasil</span>
                     </span>
                     <nav aria-label="Table navigation">
                         <ul class="pagination pagination-sm m-0">
