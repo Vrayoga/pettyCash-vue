@@ -1,921 +1,681 @@
 <script setup>
-import { ref } from 'vue'
-import HeaderComponent from '@/components/Header/HeaderComponent.vue'
-import FooterComponent from '@/components/Footer/FooterComponent.vue'
-import AppButton from '@/components/Button/AppButton.vue'
-import { useSessionStore } from '@/helper/sessionStore'
-import { computed } from 'vue'
+import AppButton from '@/components/Button/AppButton.vue';
+import {
+  DxDataGrid,
+  DxLoadPanel,
+  DxPager,
+  DxPaging,
+  DxToolbar,
+  DxItem,
+} from "devextreme-vue/data-grid";
+import {
+  DxColumn,
+  DxFilterRow,
+  DxHeaderFilter,
+} from "devextreme-vue/cjs/data-grid";
 
+import { ref, onMounted, computed, watch, nextTick } from "vue";
+import { useRouter } from 'vue-router';
+import { useSessionStore } from "@/helper/sessionStore";
+import { exportGridToExcel } from "@/helper/exportExcel";
+import Swal from "sweetalert2";
+
+// ===== STATE =====
 const sessionStore = useSessionStore();
-// Set mock data so HeaderComponent has something to show
-sessionStore.setSession({
-    DOMAIN: 'MPM',
-    USER_ID: 'admin',
-    DATAAREA_ID: '021',
-    MAIN_DEALER_ID: 'MD01',
-    SITE_ID_MAPPING: 'S01'
+const dataSource = ref([]);
+const isLoading = ref(false);
+const datagridRef = ref(null);
+
+
+// ===== ROUTER & SESSION =====
+const router = useRouter();
+
+onMounted(async () => {
+  console.log("Mounted MasterKartu.vue");
+  isLoading.value = true;
+  sessionStore.loadFromStorage();
+  
+  // Set mock data untuk HeaderComponent
+  if (!sessionStore.sessionData || !sessionStore.sessionData.DOMAIN) {
+    sessionStore.setSession({
+      DOMAIN: 'MPM',
+      USER_ID: 'admin',
+      DATAAREA_ID: '021',
+      MAIN_DEALER_ID: 'MD01',
+      SITE_ID_MAPPING: 'S01'
+    });
+  }
+
+  // Load dummy data
+  loadDummyData();
+  
+  await nextTick();
+  if (datagridRef.value) {
+    datagridRef.value.instance.option('dataSource', dataSource.value);
+    datagridRef.value.instance.refresh();
+  }
+  
+  isLoading.value = false;
 });
 
-// Data Dummy
-const cards = ref([
+const datagrid = computed(() => datagridRef.value?.instance);
+
+// ===== DUMMY DATA =====
+const loadDummyData = () => {
+  const dummyCards = [
     {
-        npk: '100234',
-        namaPic: 'Andi Pratama',
-        department: 'Finance',
-        divisi: 'Accounting',
-        nomorRekening: '1234567890',
-        namaBank: 'BCA',
-        expiredDate: '2026-12-01',
-        limitSaldo: 'Rp 10.000.000',
-        saldoTerpakai: 'Rp 2.500.000',
-        sisaSaldo: 'Rp 7.500.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 1,
+      npk: '100234',
+      namaPic: 'Andi Pratama',
+      department: 'Finance',
+      divisi: 'Accounting',
+      nomorRekening: '1234567890',
+      namaBank: 'BCA',
+      expiredDate: '2026-12-01',
+      limitSaldo: 'Rp 10.000.000',
+      saldoTerpakai: 'Rp 2.500.000',
+      sisaSaldo: 'Rp 7.500.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     },
     {
-        npk: '100235',
-        namaPic: 'Siti Rahma',
-        department: 'Operation',
-        divisi: 'Logistic',
-        nomorRekening: '9876543210',
-        namaBank: 'Mandiri',
-        expiredDate: '2027-06-01',
-        limitSaldo: 'Rp 5.000.000',
-        saldoTerpakai: 'Rp 1.000.000',
-        sisaSaldo: 'Rp 4.000.000',
-        tipeKartu: 'Non Card',
-        status: 'Inactive'
+      id: 2,
+      npk: '100235',
+      namaPic: 'Siti Rahma',
+      department: 'Operation',
+      divisi: 'Logistic',
+      nomorRekening: '9876543210',
+      namaBank: 'Mandiri',
+      expiredDate: '2027-06-01',
+      limitSaldo: 'Rp 5.000.000',
+      saldoTerpakai: 'Rp 1.000.000',
+      sisaSaldo: 'Rp 4.000.000',
+      tipeKartu: 'Non Card',
+      status: 'Inactive'
     },
     {
-        npk: '100236',
-        namaPic: 'Budi Santoso',
-        department: 'HR',
-        divisi: 'People Development',
-        nomorRekening: '4567891230',
-        namaBank: 'BNI',
-        expiredDate: '2026-09-01',
-        limitSaldo: 'Rp 15.000.000',
-        saldoTerpakai: 'Rp 5.000.000',
-        sisaSaldo: 'Rp 10.000.000',
-        tipeKartu: 'Credit Card',
-        status: 'Active'
+      id: 3,
+      npk: '100236',
+      namaPic: 'Budi Santoso',
+      department: 'HR',
+      divisi: 'People Development',
+      nomorRekening: '4567891230',
+      namaBank: 'BNI',
+      expiredDate: '2026-09-01',
+      limitSaldo: 'Rp 15.000.000',
+      saldoTerpakai: 'Rp 5.000.000',
+      sisaSaldo: 'Rp 10.000.000',
+      tipeKartu: 'Credit Card',
+      status: 'Active'
     },
     {
-        npk: '100237',
-        namaPic: 'Dewi Lestari',
-        department: 'Finance',
-        divisi: 'Tax',
-        nomorRekening: '5678901234',
-        namaBank: 'BRI',
-        expiredDate: '2025-10-01',
-        limitSaldo: 'Rp 8.000.000',
-        saldoTerpakai: 'Rp 2.000.000',
-        sisaSaldo: 'Rp 6.000.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 4,
+      npk: '100237',
+      namaPic: 'Dewi Lestari',
+      department: 'Finance',
+      divisi: 'Tax',
+      nomorRekening: '5678901234',
+      namaBank: 'BRI',
+      expiredDate: '2025-10-01',
+      limitSaldo: 'Rp 8.000.000',
+      saldoTerpakai: 'Rp 2.000.000',
+      sisaSaldo: 'Rp 6.000.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     },
     {
-        npk: '100238',
-        namaPic: 'Rizky Fadillah',
-        department: 'IT',
-        divisi: 'Infrastructure',
-        nomorRekening: '6789012345',
-        namaBank: 'BCA',
-        expiredDate: '2026-05-01',
-        limitSaldo: 'Rp 12.000.000',
-        saldoTerpakai: 'Rp 6.000.000',
-        sisaSaldo: 'Rp 6.000.000',
-        tipeKartu: 'Non Card',
-        status: 'Active'
+      id: 5,
+      npk: '100238',
+      namaPic: 'Rizky Fadillah',
+      department: 'IT',
+      divisi: 'Infrastructure',
+      nomorRekening: '6789012345',
+      namaBank: 'BCA',
+      expiredDate: '2026-05-01',
+      limitSaldo: 'Rp 12.000.000',
+      saldoTerpakai: 'Rp 6.000.000',
+      sisaSaldo: 'Rp 6.000.000',
+      tipeKartu: 'Non Card',
+      status: 'Active'
     },
     {
-        npk: '100239',
-        namaPic: 'Indah Permata',
-        department: 'Marketing',
-        divisi: 'Promotions',
-        nomorRekening: '7890123456',
-        namaBank: 'Mandiri',
-        expiredDate: '2027-01-01',
-        limitSaldo: 'Rp 20.000.000',
-        saldoTerpakai: 'Rp 10.000.000',
-        sisaSaldo: 'Rp 10.000.000',
-        tipeKartu: 'Credit Card',
-        status: 'Active'
+      id: 6,
+      npk: '100239',
+      namaPic: 'Indah Permata',
+      department: 'Marketing',
+      divisi: 'Promotions',
+      nomorRekening: '7890123456',
+      namaBank: 'Mandiri',
+      expiredDate: '2027-01-01',
+      limitSaldo: 'Rp 20.000.000',
+      saldoTerpakai: 'Rp 10.000.000',
+      sisaSaldo: 'Rp 10.000.000',
+      tipeKartu: 'Credit Card',
+      status: 'Active'
     },
     {
-        npk: '100240',
-        namaPic: 'Agus Setiawan',
-        department: 'Sales',
-        divisi: 'Corporate Sales',
-        nomorRekening: '8901234567',
-        namaBank: 'BCA',
-        expiredDate: '2026-11-01',
-        limitSaldo: 'Rp 15.000.000',
-        saldoTerpakai: 'Rp 12.000.000',
-        sisaSaldo: 'Rp 3.000.000',
-        tipeKartu: 'Card',
-        status: 'Inactive'
+      id: 7,
+      npk: '100240',
+      namaPic: 'Agus Setiawan',
+      department: 'Sales',
+      divisi: 'Corporate Sales',
+      nomorRekening: '8901234567',
+      namaBank: 'BCA',
+      expiredDate: '2026-11-01',
+      limitSaldo: 'Rp 15.000.000',
+      saldoTerpakai: 'Rp 12.000.000',
+      sisaSaldo: 'Rp 3.000.000',
+      tipeKartu: 'Card',
+      status: 'Inactive'
     },
     {
-        npk: '100241',
-        namaPic: 'Fitriani',
-        department: 'HR',
-        divisi: 'Recruitment',
-        nomorRekening: '9012345678',
-        namaBank: 'BNI',
-        expiredDate: '2025-08-01',
-        limitSaldo: 'Rp 5.000.000',
-        saldoTerpakai: 'Rp 1.500.000',
-        sisaSaldo: 'Rp 3.500.000',
-        tipeKartu: 'Non Card',
-        status: 'Active'
+      id: 8,
+      npk: '100241',
+      namaPic: 'Fitriani',
+      department: 'HR',
+      divisi: 'Recruitment',
+      nomorRekening: '9012345678',
+      namaBank: 'BNI',
+      expiredDate: '2025-08-01',
+      limitSaldo: 'Rp 5.000.000',
+      saldoTerpakai: 'Rp 1.500.000',
+      sisaSaldo: 'Rp 3.500.000',
+      tipeKartu: 'Non Card',
+      status: 'Active'
     },
     {
-        npk: '100242',
-        namaPic: 'Hendro Siswanto',
-        department: 'Operation',
-        divisi: 'Maintenance',
-        nomorRekening: '0123456789',
-        namaBank: 'BRI',
-        expiredDate: '2026-03-01',
-        limitSaldo: 'Rp 10.000.000',
-        saldoTerpakai: 'Rp 8.000.000',
-        sisaSaldo: 'Rp 2.000.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 9,
+      npk: '100242',
+      namaPic: 'Hendro Siswanto',
+      department: 'Operation',
+      divisi: 'Maintenance',
+      nomorRekening: '0123456789',
+      namaBank: 'BRI',
+      expiredDate: '2026-03-01',
+      limitSaldo: 'Rp 10.000.000',
+      saldoTerpakai: 'Rp 8.000.000',
+      sisaSaldo: 'Rp 2.000.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     },
     {
-        npk: '100243',
-        namaPic: 'Maya Sari',
-        department: 'Finance',
-        divisi: 'Treasury',
-        nomorRekening: '1122334455',
-        namaBank: 'Mandiri',
-        expiredDate: '2027-12-01',
-        limitSaldo: 'Rp 25.000.000',
-        saldoTerpakai: 'Rp 5.000.000',
-        sisaSaldo: 'Rp 20.000.000',
-        tipeKartu: 'Credit Card',
-        status: 'Active'
+      id: 10,
+      npk: '100243',
+      namaPic: 'Maya Sari',
+      department: 'Finance',
+      divisi: 'Treasury',
+      nomorRekening: '1122334455',
+      namaBank: 'Mandiri',
+      expiredDate: '2027-12-01',
+      limitSaldo: 'Rp 25.000.000',
+      saldoTerpakai: 'Rp 5.000.000',
+      sisaSaldo: 'Rp 20.000.000',
+      tipeKartu: 'Credit Card',
+      status: 'Active'
     },
     {
-        npk: '100244',
-        namaPic: 'Doni Saputra',
-        department: 'IT',
-        divisi: 'Software Development',
-        nomorRekening: '2233445566',
-        namaBank: 'BCA',
-        expiredDate: '2026-07-01',
-        limitSaldo: 'Rp 10.000.000',
-        saldoTerpakai: 'Rp 2.000.000',
-        sisaSaldo: 'Rp 8.000.000',
-        tipeKartu: 'Non Card',
-        status: 'Active'
+      id: 11,
+      npk: '100244',
+      namaPic: 'Doni Saputra',
+      department: 'IT',
+      divisi: 'Software Development',
+      nomorRekening: '2233445566',
+      namaBank: 'BCA',
+      expiredDate: '2026-07-01',
+      limitSaldo: 'Rp 10.000.000',
+      saldoTerpakai: 'Rp 2.000.000',
+      sisaSaldo: 'Rp 8.000.000',
+      tipeKartu: 'Non Card',
+      status: 'Active'
     },
     {
-        npk: '100245',
-        namaPic: 'Nina Marlina',
-        department: 'Marketing',
-        divisi: 'Digital Marketing',
-        nomorRekening: '3344556677',
-        namaBank: 'BNI',
-        expiredDate: '2025-11-01',
-        limitSaldo: 'Rp 12.000.000',
-        saldoTerpakai: 'Rp 4.000.000',
-        sisaSaldo: 'Rp 8.000.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 12,
+      npk: '100245',
+      namaPic: 'Nina Marlina',
+      department: 'Marketing',
+      divisi: 'Digital Marketing',
+      nomorRekening: '3344556677',
+      namaBank: 'BNI',
+      expiredDate: '2025-11-01',
+      limitSaldo: 'Rp 12.000.000',
+      saldoTerpakai: 'Rp 4.000.000',
+      sisaSaldo: 'Rp 8.000.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     },
     {
-        npk: '100246',
-        namaPic: 'Reza Pahlevi',
-        department: 'Sales',
-        divisi: 'Retail Sales',
-        nomorRekening: '4455667788',
-        namaBank: 'BRI',
-        expiredDate: '2026-10-01',
-        limitSaldo: 'Rp 8.000.000',
-        saldoTerpakai: 'Rp 7.500.000',
-        sisaSaldo: 'Rp 500.000',
-        tipeKartu: 'Non Card',
-        status: 'Inactive'
+      id: 13,
+      npk: '100246',
+      namaPic: 'Reza Pahlevi',
+      department: 'Sales',
+      divisi: 'Retail Sales',
+      nomorRekening: '4455667788',
+      namaBank: 'BRI',
+      expiredDate: '2026-10-01',
+      limitSaldo: 'Rp 8.000.000',
+      saldoTerpakai: 'Rp 7.500.000',
+      sisaSaldo: 'Rp 500.000',
+      tipeKartu: 'Non Card',
+      status: 'Inactive'
     },
     {
-        npk: '100247',
-        namaPic: 'Lina Marliana',
-        department: 'HR',
-        divisi: 'Payroll',
-        nomorRekening: '5566778899',
-        namaBank: 'BCA',
-        expiredDate: '2027-02-01',
-        limitSaldo: 'Rp 15.000.000',
-        saldoTerpakai: 'Rp 10.000.000',
-        sisaSaldo: 'Rp 5.000.000',
-        tipeKartu: 'Credit Card',
-        status: 'Active'
+      id: 14,
+      npk: '100247',
+      namaPic: 'Lina Marliana',
+      department: 'HR',
+      divisi: 'Payroll',
+      nomorRekening: '5566778899',
+      namaBank: 'BCA',
+      expiredDate: '2027-02-01',
+      limitSaldo: 'Rp 15.000.000',
+      saldoTerpakai: 'Rp 10.000.000',
+      sisaSaldo: 'Rp 5.000.000',
+      tipeKartu: 'Credit Card',
+      status: 'Active'
     },
     {
-        npk: '100248',
-        namaPic: 'Ahmad Fauzi',
-        department: 'Operation',
-        divisi: 'Supply Chain',
-        nomorRekening: '6677889900',
-        namaBank: 'Mandiri',
-        expiredDate: '2026-04-01',
-        limitSaldo: 'Rp 20.000.000',
-        saldoTerpakai: 'Rp 18.000.000',
-        sisaSaldo: 'Rp 2.000.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 15,
+      npk: '100248',
+      namaPic: 'Ahmad Fauzi',
+      department: 'Operation',
+      divisi: 'Supply Chain',
+      nomorRekening: '6677889900',
+      namaBank: 'Mandiri',
+      expiredDate: '2026-04-01',
+      limitSaldo: 'Rp 20.000.000',
+      saldoTerpakai: 'Rp 18.000.000',
+      sisaSaldo: 'Rp 2.000.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     },
     {
-        npk: '100249',
-        namaPic: 'Rini Yulianti',
-        department: 'Finance',
-        divisi: 'Audit',
-        nomorRekening: '7788990011',
-        namaBank: 'BNI',
-        expiredDate: '2025-09-01',
-        limitSaldo: 'Rp 10.000.000',
-        saldoTerpakai: 'Rp 3.000.000',
-        sisaSaldo: 'Rp 7.000.000',
-        tipeKartu: 'Non Card',
-        status: 'Active'
+      id: 16,
+      npk: '100249',
+      namaPic: 'Rini Yulianti',
+      department: 'Finance',
+      divisi: 'Audit',
+      nomorRekening: '7788990011',
+      namaBank: 'BNI',
+      expiredDate: '2025-09-01',
+      limitSaldo: 'Rp 10.000.000',
+      saldoTerpakai: 'Rp 3.000.000',
+      sisaSaldo: 'Rp 7.000.000',
+      tipeKartu: 'Non Card',
+      status: 'Active'
     },
     {
-        npk: '100250',
-        namaPic: 'Eko Prasetyo',
-        department: 'IT',
-        divisi: 'Network',
-        nomorRekening: '8899001122',
-        namaBank: 'BRI',
-        expiredDate: '2026-12-01',
-        limitSaldo: 'Rp 15.000.000',
-        saldoTerpakai: 'Rp 5.000.000',
-        sisaSaldo: 'Rp 10.000.000',
-        tipeKartu: 'Credit Card',
-        status: 'Inactive'
+      id: 17,
+      npk: '100250',
+      namaPic: 'Eko Prasetyo',
+      department: 'IT',
+      divisi: 'Network',
+      nomorRekening: '8899001122',
+      namaBank: 'BRI',
+      expiredDate: '2026-12-01',
+      limitSaldo: 'Rp 15.000.000',
+      saldoTerpakai: 'Rp 5.000.000',
+      sisaSaldo: 'Rp 10.000.000',
+      tipeKartu: 'Credit Card',
+      status: 'Inactive'
     },
     {
-        npk: '100251',
-        namaPic: 'Tuti Wulandari',
-        department: 'Marketing',
-        divisi: 'Public Relations',
-        nomorRekening: '9900112233',
-        namaBank: 'BCA',
-        expiredDate: '2027-05-01',
-        limitSaldo: 'Rp 8.000.000',
-        saldoTerpakai: 'Rp 2.500.000',
-        sisaSaldo: 'Rp 5.500.000',
-        tipeKartu: 'Card',
-        status: 'Active'
+      id: 18,
+      npk: '100251',
+      namaPic: 'Tuti Wulandari',
+      department: 'Marketing',
+      divisi: 'Public Relations',
+      nomorRekening: '9900112233',
+      namaBank: 'BCA',
+      expiredDate: '2027-05-01',
+      limitSaldo: 'Rp 8.000.000',
+      saldoTerpakai: 'Rp 2.500.000',
+      sisaSaldo: 'Rp 5.500.000',
+      tipeKartu: 'Card',
+      status: 'Active'
     }
-])
+  ];
+  dataSource.value = dummyCards;
+};
 
+// ===== WATCHERS =====
+watch(isLoading, () => {
+  if (!datagridRef.value) return;
+  if (isLoading.value) {
+    datagrid.value?.beginCustomLoading?.();
+  } else {
+    datagrid.value?.endCustomLoading?.();
+  }
+});
 
-// Set pagination state
-const currentPage = ref(1)
-const itemsPerPage = ref(5) // adjust items per page here
-
-
-
-const filterPic = ref('')
-const filterNpk = ref('')
-const filterRekening = ref('')
-const filterStatus = ref('')
-const filterTipeOptions = ref('')
-
-const appliedFilters = ref({
-    pic: '',
-    npk: '',
-    rekening: '',
-    status: '',
-    tipe: ''
-})
-
-const applyFilter = () => {
-    appliedFilters.value = {
-        pic: filterPic.value,
-        npk: filterNpk.value,
-        rekening: filterRekening.value,
-        status: filterStatus.value,
-        tipe: filterTipeOptions.value
-    }
-    currentPage.value = 1
-}
-
-const filteredCards = computed(() => {
-    return cards.value.filter(card => {
-        const matchPic = appliedFilters.value.pic === '' || card.namaPic === appliedFilters.value.pic
-        const matchNpk = appliedFilters.value.npk === '' || card.npk === appliedFilters.value.npk
-        const matchRekening = appliedFilters.value.rekening === '' || card.nomorRekening === appliedFilters.value.rekening
-        const matchStatus = appliedFilters.value.status === '' || card.status === appliedFilters.value.status
-        const matchTipe = appliedFilters.value.tipe === '' || card.tipeKartu === appliedFilters.value.tipe
-        
-        return matchPic && matchNpk && matchRekening && matchStatus && matchTipe
-    })
-})
-
-const totalPages = computed(() => {
-    return Math.ceil(filteredCards.value.length / itemsPerPage.value)
-})
-
-const paginatedCards = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value
-    const end = start + itemsPerPage.value
-    return filteredCards.value.slice(start, end)
-})
-
-const prevPage = () => {
-    if (currentPage.value > 1) currentPage.value--
-}
-
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) currentPage.value++
-}
-
-const goToPage = (page) => {
-    currentPage.value = page
-}
-
-const uniquePics = computed(() => [...new Set(cards.value.map(c => c.namaPic))].sort())
-const uniqueNpks = computed(() => [...new Set(cards.value.map(c => c.npk))].sort())
-const uniqueRekenings = computed(() => [...new Set(cards.value.map(c => c.nomorRekening))].sort())
-
-// Form Modal State
-const showModal = ref(false)
-const isEditMode = ref(false)
-const editIndex = ref(-1)
-
-// Form Fields Default
-const defaultFormData = {
-    npk: '',
-    namaPic: '',
-    department: '',
-    divisi: '',
-    nomorRekening: '',
-    namaBank: '',
-    expiredDate: '',
-    limitSaldo: '',
-    tipeKartu: 'Card',
-    status: 'Active'
-}
-
-const formData = ref({ ...defaultFormData })
-
+// ===== ACTION HANDLERS =====
 const handleNew = () => {
-    isEditMode.value = false
-    editIndex.value = -1
-    formData.value = { ...defaultFormData }
-    showModal.value = true
-}
+  router.push('/master-kartu/add');
+};
 
-const closeModal = () => {
-    showModal.value = false
-}
+const handleEdit = (row) => {
+  const npk = row?.data?.npk || row?.key;
+  router.push(`/master-kartu/edit/${npk}`);
+};
 
-import { apiSelf } from '@/helper/ourAxios'
+const handleEditLimit = (row) => {
+  const npk = row?.data?.npk || row?.key;
+  router.push(`/master-kartu/edit-limit/${npk}`);
+};
 
-const handleSimpan = async () => {
-    try {
-        if (isEditMode.value && editIndex.value !== -1) {
-
-            const response = await apiSelf.put(`/api/petty-cash/update/${formData.value.npk}`, formData.value)
-            
-            if (response.data && response.status === 200) {
-                cards.value[editIndex.value] = { ...formData.value }
-                alert("Data berhasil diperbarui!")
-            } else {
-                alert("Gagal memperbarui data dari server!")
-            }
-        } else {
-
-            const response = await apiSelf.post('/api/petty-cash/create', formData.value)
-            
-            if (response.data && response.status === 200) {
-                cards.value.push({ ...formData.value })
-                alert("Data berhasil disimpan!")
-            } else {
-                alert("Gagal menyimpan data ke server!")
-            }
-        }
-        closeModal()
-    } catch (error) {
-        console.error("Error saving data:", error)
-        alert("Terjadi kesalahan saat menghubungi server!")
-    }
-}
-
-const handleEdit = (npk) => {
-    const targetIndex = cards.value.findIndex(item => item.npk === npk)
-    if (targetIndex !== -1) {
-        isEditMode.value = true
-        editIndex.value = targetIndex
-        formData.value = { ...cards.value[targetIndex] }
-        showModal.value = true
-    }
-}
-
-const handleExport = () => {
-    let dataToExport = cards.value;
-    
-    // Cek apakah ada filter yang sedang aktif
-    if (filteredCards.value.length !== cards.value.length) {
-        const exportFiltered = confirm("Anda sedang menggunakan filter.\nKlik OK untuk export HANYA data yang difilter.\nKlik Cancel untuk export SEMUA data.");
-        if (exportFiltered) {
-            dataToExport = filteredCards.value;
-        }
-    }
-
-    if (dataToExport.length === 0) {
-        alert("Tidak ada data untuk diexport!");
-        return;
-    }
-
-    // Persiapkan CSV Header
-    const headers = [
-        "NPK", "Nama PIC", "Department", "Divisi", "Nomor Rekening",
-        "Nama Bank", "Expired Date", "Limit Saldo", "Saldo Terpakai",
-        "Sisa Saldo", "Tipe Kartu", "Status"
-    ];
-
-    // Persiapkan CSV Rows
-    const rows = dataToExport.map(item => [
-        `"${item.npk}"`, 
-        `"${item.namaPic}"`, 
-        `"${item.department}"`, 
-        `"${item.divisi}"`, 
-        `"${item.nomorRekening}"`, 
-        `"${item.namaBank}"`, 
-        `"${item.expiredDate}"`, 
-        `"${item.limitSaldo}"`, 
-        `"${item.saldoTerpakai}"`, 
-        `"${item.sisaSaldo}"`, 
-        `"${item.tipeKartu}"`, 
-        `"${item.status}"`
-    ]);
-
+const handleDelete = async (row) => {
+  const npk = row?.data?.npk || row?.key;
   
-    let csvContent = headers.join(";") + "\n" + rows.map(e => e.join(";")).join("\n");
+  const result = await Swal.fire({
+    title: 'Konfirmasi Hapus',
+    text: `Apakah Anda yakin ingin menghapus data NPK: ${npk}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Ya, Hapus',
+    cancelButtonText: 'Batal',
+  });
 
-    // Supaya karakter spesial terbaca dengan baik di excel (BOM)
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  if (!result.isConfirmed) return;
+
+  isLoading.value = true;
+  try {
+    // Simulasi delete (ganti dengan API call)
+    dataSource.value = dataSource.value.filter(item => item.npk !== npk);
     
-    // Trigger Download
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Master_Kartu_Petty_Cash_${new Date().toISOString().slice(0, 10)}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-const handleHapus = (npk) => {
-    if(confirm("Hapus data NPK: " + npk + "?")) {
-        alert("Terhapus")
+    await Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
+    
+    await nextTick();
+    if (datagridRef.value) {
+      datagridRef.value.instance.refresh();
     }
-}
+  } catch (err) {
+    console.error('handleDelete error', err);
+    await Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data.', 'error');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleToggleStatus = async (row) => {
+  const npk = row?.data?.npk || row?.key;
+  const currentStatus = row?.data?.status;
+  const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+  const result = await Swal.fire({
+    title: `Konfirmasi ${newStatus}`,
+    text: `Apakah Anda yakin ingin mengubah status ke ${newStatus}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#f26f21',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: `Ya, ${newStatus}`,
+    cancelButtonText: 'Batal',
+  });
+
+  if (!result.isConfirmed) return;
+
+  isLoading.value = true;
+  try {
+    // Simulasi update status (ganti dengan API call)
+    const itemIndex = dataSource.value.findIndex(item => item.npk === npk);
+    if (itemIndex !== -1) {
+      dataSource.value[itemIndex].status = newStatus;
+    }
+
+    await Swal.fire('Berhasil!', `Status berhasil diubah ke ${newStatus}.`, 'success');
+    
+    await nextTick();
+    if (datagridRef.value) {
+      datagridRef.value.instance.refresh();
+    }
+  } catch (err) {
+    console.error('handleToggleStatus error', err);
+    await Swal.fire('Error!', 'Terjadi kesalahan saat mengubah status.', 'error');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleExport = (e) => {
+  exportGridToExcel(e, "MasterKartu_Export");
+};
 </script>
 
 <template>
-    <div class="d-flex flex-column min-vh-100 bg-light-gray">
-        <!-- HEADER -->
-        <HeaderComponent />
-
-        <!-- MAIN CONTENT -->
-        <main class="container-fluid flex-fill px-4 mt-4 mb-5">
-            
-            <!-- TITLE ROW -->
-            <div class="d-flex justify-content-between align-items-center mb-4 mt-2 section-header">
-                <h3 class="fw-semibold text-dark m-0">Master Kartu Petty Cash</h3>
-                <div class="d-flex gap-2">
-                    <AppButton type="warning" text="+ New" @click="handleNew" class="btn-orange" />
-                    <!-- Replace empty button with icon image if desired, or styled button -->
-                    <button class="btn btn-outline-secondary bg-white px-3 fw-bold" @click="handleExport">
-                       <i class="bi bi-bar-chart-fill me-1" style="color: #ff6f21;"></i>
-                       &#x1F4CA; 
-                    </button>
-                </div>
-            </div>
-
-            <!-- FILTER ROW -->
-            <div class="card shadow-sm border-0 rounded-3 mb-4 filter-container">
-                <div class="card-body py-3 px-4">
-                    <div class="row gx-3 gy-2 align-items-center">
-                        <div class="col-12 col-md filter-col">
-                            <select v-model="filterPic" class="form-select w-100 form-select-sm">
-                                <option value="">All PIC</option>
-                                <option v-for="pic in uniquePics" :key="pic" :value="pic">{{ pic }}</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md filter-col">
-                            <select v-model="filterNpk" class="form-select w-100 form-select-sm">
-                                <option value="">All NPK</option>
-                                <option v-for="npk in uniqueNpks" :key="npk" :value="npk">{{ npk }}</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md filter-col">
-                            <select v-model="filterRekening" class="form-select w-100 form-select-sm">
-                                <option value="">All Nomor Rekening</option>
-                                <option v-for="req in uniqueRekenings" :key="req" :value="req">{{ req }}</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md filter-col">
-                            <select v-model="filterStatus" class="form-select w-100 form-select-sm">
-                                <option value="">All Status</option>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md filter-col">
-                            <select v-model="filterTipeOptions" class="form-select w-100 form-select-sm">
-                                <option value="">All Tipe Kartu</option>
-                                <option value="Card">Card</option>
-                                <option value="Non Card">Non Card</option>
-                                <option value="Credit Card">Credit Card</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-auto mt-3 mt-md-0 d-flex align-items-stretch">
-                            <button @click="applyFilter" class="btn btn-warning text-white btn-sm w-100 filter-btn shadow-sm d-flex align-items-center justify-content-center m-0" style="background-color: #f26f21; border-color: #f26f21;">
-                                <i class="bi bi-search me-1"></i> Filter
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DATA TABLE -->
-            <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
-                <div class="table-responsive">
-                    <table class="table table-borderless table-hover mb-0 custom-table align-middle">
-                        <thead>
-                            <tr>
-                                <th class="text-secondary fw-medium py-3 ps-4">NPK</th>
-                                <th class="text-secondary fw-medium py-3">Nama PIC</th>
-                                <th class="text-secondary fw-medium py-3">Department</th>
-                                <th class="text-secondary fw-medium py-3">Divisi</th>
-                                <th class="text-secondary fw-medium py-3">Nomor Rekening</th>
-                                <th class="text-secondary fw-medium py-3">Nama Bank</th>
-                                <th class="text-secondary fw-medium py-3">Expired Date</th>
-                                <th class="text-secondary fw-medium py-3">Limit Saldo</th>
-                                <th class="text-secondary fw-medium py-3 text-center">Saldo Terpakai</th>
-                                <th class="text-secondary fw-medium py-3 text-center">Sisa Saldo</th>
-                                <th class="text-secondary fw-medium py-3">Tipe Kartu</th>
-                                <th class="text-secondary fw-medium py-3 text-center">Status</th>
-                                <th class="text-secondary fw-medium py-3 pe-4 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, index) in paginatedCards" :key="index" class="border-bottom">
-                                <td class="ps-4 fw-medium text-dark">{{ item.npk }}</td>
-                                <td class="text-dark">{{ item.namaPic }}</td>
-                                <td class="text-dark">{{ item.department }}</td>
-                                <td class="text-dark">{{ item.divisi }}</td>
-                                <td class="text-dark">{{ item.nomorRekening }}</td>
-                                <td class="text-dark">{{ item.namaBank }}</td>
-                                <td class="text-dark">{{ item.expiredDate }}</td>
-                                <td class="text-dark">{{ item.limitSaldo }}</td>
-                                <td class="text-warning text-center fw-medium">{{ item.saldoTerpakai }}</td>
-                                <td class="text-success text-center fw-medium">{{ item.sisaSaldo }}</td>
-                                <td class="text-dark">{{ item.tipeKartu }}</td>
-                                <td class="text-center">
-                                    <span :class="['badge-status', item.status === 'Active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger']">
-                                        {{ item.status }}
-                                    </span>
-                                </td>
-                                <td class="pe-4 text-center">
-                                    <div class="d-flex gap-2 justify-content-center">
-                                        <button class="btn btn-outline-secondary btn-sm action-btn px-3" @click="handleEdit(item.npk)">Edit</button>
-                                        <button class="btn btn-danger btn-sm action-btn px-3 fw-medium" @click="handleHapus(item.npk)">Hapus</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- PAGINATION CONTROLS -->
-                <div class="card-footer bg-white border-top-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                    <span class="text-secondary small">
-                        <span v-if="filteredCards.length > 0">
-                            Menampilkan {{ ((currentPage - 1) * itemsPerPage) + 1 }} - 
-                            {{ Math.min(currentPage * itemsPerPage, filteredCards.length) }}
-                            dari {{ filteredCards.length }} hasil
-                        </span>
-                        <span v-else>0 hasil</span>
-                    </span>
-                    <nav aria-label="Table navigation">
-                        <ul class="pagination pagination-sm m-0">
-                            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                                <button class="page-link shadow-none" @click="prevPage">Sebelumnya</button>
-                            </li>
-                            <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
-                                <button class="page-link shadow-none" @click="goToPage(page)">{{ page }}</button>
-                            </li>
-                            <li class="page-item" :class="{ disabled: currentPage === totalPages || totalPages === 0 }">
-                                <button class="page-link shadow-none" @click="nextPage">Selanjutnya</button>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </main>
-
-        <!-- ADD MODAL -->
-        <div v-if="showModal" class="modal-backdrop fade show"></div>
-        <div v-if="showModal" class="modal fade show d-block" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered custom-modal">
-                <div class="modal-content border-0">
-                    <div class="modal-header border-0 pb-0 pt-4 px-4">
-                        <h5 class="modal-title fw-semibold text-dark fs-5" id="modalLabel">{{ isEditMode ? 'Edit Kartu Petty Cash' : 'Buat Kartu Petty Cash' }}</h5>
-                        <button type="button" class="btn-close shadow-none" @click="closeModal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body px-4 py-4">
-                        <div class="card bg-white shadow-sm border-0 rounded-3 p-4">
-                            <!-- R1 -->
-                            <div class="row g-4 mb-4">
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">NPK</label>
-                                    <select v-model="formData.npk" class="form-select form-select-sm custom-input" :disabled="isEditMode">
-                                        <option value="" disabled>Pilih NPK</option>
-                                        <option value="100234">100234</option>
-                                        <option value="100235">100235</option>
-                                        <option value="100236">100236</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Nama PIC</label>
-                                    <input type="text" v-model="formData.namaPic" class="form-control form-control-sm custom-input" placeholder="">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Department</label>
-                                    <input type="text" v-model="formData.department" class="form-control form-control-sm custom-input" placeholder="">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Divisi</label>
-                                    <input type="text" v-model="formData.divisi" class="form-control form-control-sm custom-input" placeholder="">
-                                </div>
-                            </div>
-                            
-                            <!-- R2 -->
-                            <div class="row g-4 mb-4">
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Nomor Rekening</label>
-                                    <input type="text" v-model="formData.nomorRekening" class="form-control form-control-sm custom-input" placeholder="Masukkan Nomor Rekening">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Nama Bank</label>
-                                    <input type="text" v-model="formData.namaBank" class="form-control form-control-sm custom-input" placeholder="Masukkan Nama Bank">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Expired Date</label>
-                                    <input type="date" v-model="formData.expiredDate" class="form-control form-control-sm custom-input" placeholder="mm/yyyy">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Limit Saldo</label>
-                                    <input type="text" v-model="formData.limitSaldo" class="form-control form-control-sm custom-input" placeholder="Masukkan Limit Saldo">
-                                </div>
-                            </div>
-
-                            <!-- R3 -->
-                            <div class="row g-4 mb-5">
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Tipe Kartu</label>
-                                    <select v-model="formData.tipeKartu" class="form-select form-select-sm custom-input">
-                                        <option value="Card">Card</option>
-                                        <option value="Non Card">Non Card</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-medium mb-1">Status</label>
-                                    <select v-model="formData.status" class="form-select form-select-sm custom-input">
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning text-white px-4 custom-modal-btn" style="background-color: #f26f21; border-color: #f26f21;" @click="handleSimpan">Simpan</button>
-                                <button class="btn px-4 custom-btn-outline-orange custom-modal-btn" @click="closeModal">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="bg-light-gray">
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-4 mt-4 mb-5">
+      
+      <!-- TITLE ROW -->
+      <div class="d-flex justify-content-between align-items-center mb-4 mt-2 section-header">
+        <h3 class="fw-semibold text-dark m-0">Master Kartu Petty Cash</h3>
+        <div class="d-flex gap-2">
+          <AppButton type="warning" text="+ New" @click="handleNew" class="btn-orange" />
         </div>
+      </div>
 
-        <!-- FOOTER -->
-        <FooterComponent />
-    </div>
+      <!-- DATAGRID CARD -->
+      <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <DxDataGrid 
+          :data-source="dataSource" 
+          key-expr="id" 
+          :show-borders="true" 
+          :allow-column-resizing="true"
+          ref="datagridRef" 
+          :column-auto-width="true" 
+          :export="{
+            enabled: true,
+            allowExportSelectedData: false,
+          }" 
+          @exporting="handleExport"
+        >
+          <DxToolbar>
+            <DxItem location="after" widget="dxButton" :options="{
+              icon: 'plus',
+              onClick: handleNew,
+            }" />
+            <DxItem name="exportButton" />
+          </DxToolbar>
+          
+          <DxLoadPanel :show-indicator="true" :show-pane="true" position="center" :visible="isLoading" />
+          <DxFilterRow :visible="true" />
+          <DxPaging :page-size="10" />
+          <DxPager 
+            :visible="true" 
+            :allowed-page-sizes="[10, 25, 50, 100]" 
+            :show-page-size-selector="true" 
+            :show-info="true"
+            :show-navigation-buttons="true" 
+          />
+          <DxHeaderFilter :visible="true" />
+
+          <!-- Kolom untuk button action -->
+          <DxColumn :width="280" :caption="'Action'" cell-template="actionCell" :allow-exporting="false" />
+          
+          <!-- Data Columns -->
+          <DxColumn data-field="npk" caption="NPK" />
+          <DxColumn data-field="namaPic" caption="Nama PIC" />
+          <DxColumn data-field="department" caption="Department" />
+          <DxColumn data-field="divisi" caption="Divisi" />
+          <DxColumn data-field="nomorRekening" caption="Nomor Rekening" />
+          <DxColumn data-field="namaBank" caption="Nama Bank" />
+          <DxColumn data-field="expiredDate" caption="Expired Date" />
+          <DxColumn data-field="limitSaldo" caption="Limit Saldo" />
+          <DxColumn data-field="saldoTerpakai" caption="Saldo Terpakai" />
+          <DxColumn data-field="sisaSaldo" caption="Sisa Saldo" />
+          <DxColumn data-field="tipeKartu" caption="Tipe Kartu" />
+          <DxColumn 
+            data-field="status" 
+            caption="Status"
+            :calculate-cell-value="row => row.status" 
+            cell-template="statusCell"
+          />
+
+          <!-- Template untuk Status Badge -->
+          <template #statusCell="{ data }">
+            <span :class="['badge-status', data.row.data.status === 'Active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger']">
+              {{ data.row.data.status }}
+            </span>
+          </template>
+
+          <!-- Template untuk Action Buttons -->
+          <template #actionCell="{ data }">
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+              <button 
+                class="btn btn-outline-secondary btn-sm action-btn px-3" 
+                @click="handleEdit(data.row)"
+              >
+                Edit
+              </button>
+              <button 
+                class="btn btn-outline-info btn-sm action-btn px-3" 
+                @click="handleEditLimit(data.row)"
+              >
+                Edit Limit
+              </button>
+              <button 
+                class="btn btn-danger btn-sm action-btn px-3 fw-medium" 
+                @click="handleDelete(data.row)"
+              >
+                Hapus
+              </button>
+            </div>
+          </template>
+        </DxDataGrid>
+      </div>
+
+      <div v-if="!isLoading && (!dataSource || dataSource.length === 0)" class="mt-3">
+        <div class="alert alert-info">Tidak ada data Master Kartu untuk ditampilkan.</div>
+      </div>
+    </main>
+  </div>
 </template>
 
 <style scoped>
 .bg-light-gray {
-    background-color: #f4f6fa;
+  background-color: #f4f6fa;
 }
 
 .text-dark {
-    color: #4a4a4a !important;
+  color: #4a4a4a !important;
 }
 
 .text-secondary {
-    color: #8a96a3 !important;
-    font-size: 0.85rem;
+  color: #8a96a3 !important;
+  font-size: 0.85rem;
 }
 
 .section-header h3 {
-    color: #3f4e65;
-}
-
-.table-responsive {
-    background-color: #ffffff;
-}
-
-.custom-table {
-    font-size: 0.9rem;
-}
-
-.custom-table thead th {
-    background-color: #ffffff;
-    border-bottom: 1px solid #eef0f3;
-}
-
-.custom-table tbody tr {
-    transition: background-color 0.15s ease-in-out;
-}
-
-.custom-table tbody tr:hover {
-    background-color: #fafbfc;
-}
-
-.custom-table tbody td {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eef0f3;
+  color: #3f4e65;
 }
 
 /* Badge Status styling */
 .badge-status {
-    padding: 0.35rem 0.8rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .bg-soft-success {
-    background-color: #e5f7ed;
+  background-color: #e5f7ed;
 }
 
 .text-success {
-    color: #2eb85c !important;
+  color: #2eb85c !important;
 }
 
 .bg-soft-danger {
-    background-color: #fde6e8;
+  background-color: #fde6e8;
 }
 
 .text-danger {
-    color: #e55353 !important;
+  color: #e55353 !important;
 }
 
 .text-warning {
-    color: #f26f21 !important; /* Orange text for saldo terpakai based on Figma */
-}
-
-/* Override standard bootstrap warning if needed */
-.custom-table .text-success {
-    color: #2eb85c !important;
+  color: #f26f21 !important;
 }
 
 /* Buttons */
 .btn-orange {
-    background-color: #f26f21;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(242, 111, 33, 0.2);
+  background-color: #f26f21;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(242, 111, 33, 0.2);
 }
 
 .btn-orange:hover {
-    background-color: #e05e10;
+  background-color: #e05e10;
 }
 
 .action-btn {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
 }
 
 .btn-outline-secondary.action-btn {
-    color: #6c757d;
-    border-color: #d1d6dc;
+  color: #6c757d;
+  border-color: #d1d6dc;
 }
 
 .btn-danger.action-btn {
-    background-color: #dc3545;
-    border-color: #dc3545;
+  background-color: #dc3545;
+  border-color: #dc3545;
 }
 
-/* Select Box Styling */
-.filter-container .form-select {
-    color: #495057;
-    border-color: #e2e5e9;
-    border-radius: 20px;
-    padding: 0.4rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 500;
+/* DevExtreme Grid Customization */
+:deep(.dx-datagrid) {
+  background-color: #ffffff;
 }
 
-.filter-container select:focus {
-    box-shadow: none;
-    border-color: #aeb5be;
+:deep(.dx-datagrid-header) {
+  background-color: #ffffff;
+  border-bottom: 1px solid #eef0f3;
 }
 
-.filter-btn {
-    border-radius: 20px;
-    padding: 0.4rem 1.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
+:deep(.dx-datagrid-table tbody tr:hover) {
+  background-color: #fafbfc !important;
 }
 
-.filter-col {
-  /* This ensures that on very large screens it doesn't stretch infinitely, but looks nice inline */
-  flex-grow: 1;
+:deep(.dx-datagrid-cell) {
+  padding: 1rem;
+  border-bottom: 1px solid #eef0f3;
 }
 
-/* Pagination Overrides */
-.page-link {
-    color: #6c757d;
-    border: none;
-    margin: 0 0.15rem;
-    border-radius: 6px;
-    font-weight: 500;
+:deep(.dx-datagrid-toolbar) {
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eef0f3;
 }
 
-.page-item.active .page-link {
-    background-color: #f26f21;
-    color: white;
+:deep(.dx-pager) {
+  background-color: #ffffff;
+  border-top: 1px solid #eef0f3;
+  padding: 0.75rem 1rem;
 }
 
-.page-link:hover {
-    background-color: #f4f6fa;
-    color: #f26f21;
+:deep(.dx-page-index) {
+  color: #f26f21 !important;
 }
 
-.page-item.active .page-link:hover {
-    background-color: #f26f21;
-    color: white;
+:deep(.dx-page-index.dx-selection) {
+  background-color: #f26f21 !important;
+  color: white !important;
 }
 
-/* Modal Styling */
-.modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.4);
+:deep(.dx-button-default) {
+  color: #f26f21 !important;
 }
 
-.custom-modal {
-    max-width: 1100px;
+:deep(.dx-button-default:hover) {
+  background-color: #fff4ec;
 }
 
-.custom-input {
-    border-color: #dee2e6;
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    color: #495057;
-}
-
-.custom-input:focus {
-    box-shadow: none;
-    border-color: #f26f21;
-}
-
-.text-muted {
-    color: #8f959e !important;
-}
-
-.custom-modal-btn {
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem !important;
-}
-
-.custom-btn-outline-orange {
-    color: #f26f21;
-    border: 1px solid #f26f21;
-    background-color: transparent;
-}
-
-.custom-btn-outline-orange:hover {
-    background-color: #fff4ec;
-    color: #d95c1b;
-}
-
-.modal-content {
-    background-color: #f9f9f9;
+:deep(.dx-header-filter) {
+  color: #f26f21 !important;
 }
 </style>
