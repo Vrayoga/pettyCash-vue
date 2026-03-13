@@ -1,6 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { apiSelf } from '@/helper/ourAxios'
+import Swal from 'sweetalert2'
+
+const router = useRouter()
 
 const props = defineProps({ 
   titleProject: { type: String, default: 'Edit Kartu' }, 
@@ -21,19 +25,144 @@ const formData = ref({
   status: 'Active'
 })
 
+// Simulasi data dari MasterKartu
+const dummyCards = ref([
+  {
+    id: 1,
+    npk: '100234',
+    namaPic: 'Andi Pratama',
+    department: 'Finance',
+    divisi: 'Accounting',
+    nomorRekening: '1234567890',
+    namaBank: 'BCA',
+    expiredDate: '2025-12-01',
+    limitSaldo: 'Rp 10.000.000',
+    tipeKartu: 'Card',
+    status: 'Active'
+  },
+  {
+    id: 2,
+    npk: '100235',
+    namaPic: 'Siti Aminah',
+    department: 'HRD',
+    divisi: 'Recruitment',
+    nomorRekening: '0987654321',
+    namaBank: 'Mandiri',
+    expiredDate: '2026-06-01',
+    limitSaldo: 'Rp 5.000.000',
+    tipeKartu: 'Non Card',
+    status: 'Active'
+  },
+  {
+    id: 3,
+    npk: '100236',
+    namaPic: 'Budi Santoso',
+    department: 'IT',
+    divisi: 'Infrastructure',
+    nomorRekening: '1122334455',
+    namaBank: 'BNI',
+    expiredDate: '2024-11-01',
+    limitSaldo: 'Rp 15.000.000',
+    tipeKartu: 'Card',
+    status: 'Inactive'
+  },
+  {
+    id: 15,
+    npk: '100248',
+    namaPic: 'Ahmad Fauzi',
+    department: 'Operation',
+    divisi: 'Supply Chain',
+    nomorRekening: '6677889900',
+    namaBank: 'Mandiri',
+    expiredDate: '2026-04-01',
+    limitSaldo: 'Rp 20.000.000',
+    tipeKartu: 'Card',
+    status: 'Active'
+  },
+  {
+    id: 16,
+    npk: '100249',
+    namaPic: 'Rini Yulianti',
+    department: 'Finance',
+    divisi: 'Audit',
+    nomorRekening: '7788990011',
+    namaBank: 'BNI',
+    expiredDate: '2025-09-01',
+    limitSaldo: 'Rp 10.000.000',
+    tipeKartu: 'Non Card',
+    status: 'Active'
+  },
+  {
+    id: 17,
+    npk: '100250',
+    namaPic: 'Eko Prasetyo',
+    department: 'IT',
+    divisi: 'Network',
+    nomorRekening: '8899001122',
+    namaBank: 'BRI',
+    expiredDate: '2026-12-01',
+    limitSaldo: 'Rp 15.000.000',
+    tipeKartu: 'Credit Card',
+    status: 'Inactive'
+  },
+  {
+    id: 18,
+    npk: '100251',
+    namaPic: 'Tuti Wulandari',
+    department: 'Marketing',
+    divisi: 'Public Relations',
+    nomorRekening: '9900112233',
+    namaBank: 'BCA',
+    expiredDate: '2027-05-01',
+    limitSaldo: 'Rp 8.000.000',
+    tipeKartu: 'Card',
+    status: 'Active'
+  }
+]);
+
+onMounted(() => {
+  fetchData()
+})
+
+const fetchData = () => {
+  const found = dummyCards.value.find(item => item.npk === props.id);
+  if (found) {
+    formData.value = { ...found };
+  }
+}
+
+// Watch NPK change to auto-update PIC and Department
+watch(() => formData.value.npk, (newNpk) => {
+  const selected = dummyCards.value.find(item => item.npk === newNpk);
+  if (selected) {
+    formData.value.namaPic = selected.namaPic;
+    formData.value.department = selected.department;
+    formData.value.divisi = selected.divisi; // Auto-update group fields
+  }
+})
+
 const handleSimpan = async () => {
   try {
-    const response = await apiSelf.put(`/api/petty-cash/update/${formData.value.npk}`, formData.value)
-    
-    if (response.data && response.status === 200) {
-      alert("Data berhasil diperbarui!")
-      // Redirect back
-      window.history.back()
-    } else {
-      alert("Gagal memperbarui data dari server!")
+    // simpan data
+    const result = await Swal.fire({
+      title: 'Berhasil!',
+      text: 'Data berhasil diperbarui.',
+      icon: 'success',
+      confirmButtonColor: '#f26f21',
+    });
+
+    if (result.isConfirmed) {
+      router.push('/');
     }
+// api
+    // const response = await apiSelf.put(`/api/petty-cash/update/${formData.value.npk}`, formData.value)
+    // if (response.data && response.status === 200) {
+    //   await Swal.fire('Berhasil!', 'Data berfungsi diperbarui!', 'success')
+    //   router.push('/')
+    // }
+    
   } catch (error) {
-    alert("Error: " + error.message)
+    Swal.fire('Error!', error.message, 'error')
   }
 }
 
@@ -49,7 +178,7 @@ const handleCancel = () => {
       
       <!-- TITLE ROW -->
       <div class="d-flex justify-content-between align-items-center mb-4 mt-2 section-header">
-        <h3 class="fw-semibold text-dark m-0">{{ props.titleProject }} - {{ props.id }}</h3>
+        <h3 class="fw-semibold text-dark m-0">{{ props.titleProject }} - {{ formData.npk }}</h3>
       </div>
 
       <!-- FORM CARD -->
@@ -57,21 +186,21 @@ const handleCancel = () => {
         <!-- R1 -->
         <div class="row g-4 mb-4">
           <div class="col-md-3">
-            <label class="form-label text-muted small fw-medium mb-1">NPK</label>
-            <select v-model="formData.npk" class="form-select form-select-sm custom-input" disabled>
-              <option value="" disabled>Pilih NPK</option>
-              <option value="100234">100234</option>
-              <option value="100235">100235</option>
-              <option value="100236">100236</option>
+            <label class="form-label text-muted small fw-medium mb-1">NPK-NAMA </label>
+            <select v-model="formData.npk" class="form-select form-select-sm custom-input">
+              <option value="" disabled>Pilih NPK-NAMA</option>
+              <option v-for="item in dummyCards" :key="item.id" :value="item.npk">
+                {{ item.npk }} - {{ item.namaPic }}
+              </option>
             </select>
           </div>
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Nama PIC</label>
-            <input type="text" v-model="formData.namaPic" class="form-control form-control-sm custom-input" placeholder="">
+            <input type="text" v-model="formData.namaPic" class="form-control form-control-sm custom-input" placeholder="" disabled>
           </div>
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Department</label>
-            <input type="text" v-model="formData.department" class="form-control form-control-sm custom-input" placeholder="">
+            <input type="text" v-model="formData.department" class="form-control form-control-sm custom-input" placeholder="" disabled>
           </div>
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Divisi</label>

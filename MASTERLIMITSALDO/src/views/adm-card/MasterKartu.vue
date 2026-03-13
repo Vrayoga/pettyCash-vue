@@ -13,6 +13,7 @@ import {
   DxFilterRow,
   DxHeaderFilter,
 } from "devextreme-vue/cjs/data-grid";
+import DxSelectBox from "devextreme-vue/select-box";
 
 import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { useRouter } from 'vue-router';
@@ -25,6 +26,31 @@ const sessionStore = useSessionStore();
 const dataSource = ref([]);
 const isLoading = ref(false);
 const datagridRef = ref(null);
+
+// ===== FILTER STATE =====
+const filterNpk = ref('All NPK');
+const filterPic = ref('All PIC');
+const filterRekening = ref('All Nomor Rekening');
+const filterStatus = ref('All Status');
+const filterTipe = ref('All Tipe Data');
+
+// ===== FILTER OPTIONS (Computed) =====
+const npkOptions = computed(() => ['All NPK', ...new Set(dataSource.value.map(item => item.npk))]);
+const picOptions = computed(() => ['All PIC', ...new Set(dataSource.value.map(item => item.namaPic))]);
+const rekeningOptions = computed(() => ['All Nomor Rekening', ...new Set(dataSource.value.map(item => item.nomorRekening))]);
+const statusOptions = computed(() => ['All Status', ...new Set(dataSource.value.map(item => item.status))]);
+const tipeOptions = computed(() => ['All Tipe Data', ...new Set(dataSource.value.map(item => item.tipeKartu))]);
+
+// ===== FILTERED DATA SOURCE =====
+const filteredDataSource = computed(() => {
+  return dataSource.value.filter(item => {
+    return (filterNpk.value === 'All NPK' || item.npk === filterNpk.value) &&
+           (filterPic.value === 'All PIC' || item.namaPic === filterPic.value) &&
+           (filterRekening.value === 'All Nomor Rekening' || item.nomorRekening === filterRekening.value) &&
+           (filterStatus.value === 'All Status' || item.status === filterStatus.value) &&
+           (filterTipe.value === 'All Tipe Data' || item.tipeKartu === filterTipe.value);
+  });
+});
 
 
 // ===== ROUTER & SESSION =====
@@ -455,10 +481,61 @@ const handleExport = (e) => {
         </div>
       </div>
 
+      <!-- FILTER SECTION (Refined Design) -->
+      <div class="card shadow-sm border-0 rounded-4 p-3 mb-4 filter-container">
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+          <div class="filter-item">
+            <DxSelectBox
+              v-model:value="filterPic"
+              :items="picOptions"
+              :search-enabled="true"
+              styling-mode="outlined"
+              class="refined-select"
+            />
+          </div>
+          <div class="filter-item">
+            <DxSelectBox
+              v-model:value="filterNpk"
+              :items="npkOptions"
+              :search-enabled="true"
+              styling-mode="outlined"
+              class="refined-select"
+            />
+          </div>
+          <div class="filter-item">
+            <DxSelectBox
+              v-model:value="filterRekening"
+              :items="rekeningOptions"
+              :search-enabled="true"
+              styling-mode="outlined"
+              class="refined-select"
+            />
+          </div>
+          <div class="filter-item">
+            <DxSelectBox
+              v-model:value="filterStatus"
+              :items="statusOptions"
+              :search-enabled="true"
+              styling-mode="outlined"
+              class="refined-select"
+            />
+          </div>
+          <div class="filter-item">
+            <DxSelectBox
+              v-model:value="filterTipe"
+              :items="tipeOptions"
+              :search-enabled="true"
+              styling-mode="outlined"
+              class="refined-select"
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- DATAGRID CARD -->
       <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
         <DxDataGrid 
-          :data-source="dataSource" 
+          :data-source="filteredDataSource" 
           key-expr="id" 
           :show-borders="true" 
           :allow-column-resizing="true"
@@ -490,9 +567,6 @@ const handleExport = (e) => {
           />
           <DxHeaderFilter :visible="true" />
 
-          <!-- Kolom untuk button action -->
-          <DxColumn :width="280" :caption="'Action'" cell-template="actionCell" :allow-exporting="false" />
-          
           <!-- Data Columns -->
           <DxColumn data-field="npk" caption="NPK" />
           <DxColumn data-field="namaPic" caption="Nama PIC" />
@@ -502,8 +576,8 @@ const handleExport = (e) => {
           <DxColumn data-field="namaBank" caption="Nama Bank" />
           <DxColumn data-field="expiredDate" caption="Expired Date" />
           <DxColumn data-field="limitSaldo" caption="Limit Saldo" />
-          <DxColumn data-field="saldoTerpakai" caption="Saldo Terpakai" />
-          <DxColumn data-field="sisaSaldo" caption="Sisa Saldo" />
+          <DxColumn data-field="saldoTerpakai" caption="Saldo Terpakai" cell-template="saldoTerpakaiCell" />
+          <DxColumn data-field="sisaSaldo" caption="Sisa Saldo" cell-template="sisaSaldoCell" />
           <DxColumn data-field="tipeKartu" caption="Tipe Kartu" />
           <DxColumn 
             data-field="status" 
@@ -512,30 +586,43 @@ const handleExport = (e) => {
             cell-template="statusCell"
           />
 
+          <!-- Kolom untuk button action (dipindah ke kanan) -->
+          <DxColumn :width="300" :caption="'Action'" cell-template="actionCell" :allow-exporting="false" />
+
+          <!-- Template untuk Saldo Terpakai (Orange) -->
+          <template #saldoTerpakaiCell="{ data }">
+            <span class="text-orange fw-medium">{{ data.value }}</span>
+          </template>
+
+          <!-- Template untuk Sisa Saldo (Green) -->
+          <template #sisaSaldoCell="{ data }">
+            <span class="text-green fw-medium">{{ data.value }}</span>
+          </template>
+
           <!-- Template untuk Status Badge -->
           <template #statusCell="{ data }">
-            <span :class="['badge-status', data.row.data.status === 'Active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger']">
+            <span :class="['badge-pill', data.row.data.status === 'Active' ? 'badge-pill-success' : 'badge-pill-danger']">
               {{ data.row.data.status }}
             </span>
           </template>
 
-          <!-- Template untuk Action Buttons -->
+          <!-- Template untuk Action Buttons (Figma Style) -->
           <template #actionCell="{ data }">
-            <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <div class="d-flex gap-2 justify-content-center">
               <button 
-                class="btn btn-outline-secondary btn-sm action-btn px-3" 
+                class="btn btn-figma-outline" 
                 @click="handleEdit(data.row)"
               >
                 Edit
               </button>
               <button 
-                class="btn btn-outline-info btn-sm action-btn px-3" 
+                class="btn btn-figma-beige" 
                 @click="handleEditLimit(data.row)"
               >
                 Edit Limit
               </button>
               <button 
-                class="btn btn-danger btn-sm action-btn px-3 fw-medium" 
+                class="btn btn-figma-danger" 
                 @click="handleDelete(data.row)"
               >
                 Hapus
@@ -570,32 +657,75 @@ const handleExport = (e) => {
   color: #3f4e65;
 }
 
-/* Badge Status styling */
-.badge-status {
-  padding: 0.35rem 0.8rem;
+/* Badge Status styling refined for Figma */
+.badge-pill {
+  padding: 0.3rem 1rem;
   border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
 }
 
-.bg-soft-success {
-  background-color: #e5f7ed;
+.badge-pill-success {
+  background-color: #e6f9ed;
+  color: #2eb85c;
 }
 
-.text-success {
+.badge-pill-danger {
+  background-color: #fdeaea;
+  color: #e55353;
+}
+
+.text-orange {
+  color: #f26f21 !important;
+}
+
+.text-green {
   color: #2eb85c !important;
 }
 
-.bg-soft-danger {
-  background-color: #fde6e8;
+/* Figma Action Buttons */
+.btn-figma-outline {
+  background-color: #ffffff;
+  border: 1px solid #d1d6dc;
+  color: #3f4e65;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
-.text-danger {
-  color: #e55353 !important;
+.btn-figma-outline:hover {
+  background-color: #f8f9fa;
+  border-color: #bcbfc4;
 }
 
-.text-warning {
-  color: #f26f21 !important;
+.btn-figma-beige {
+  background-color: #f1f4e8;
+  border: 1px solid #e1e7d1;
+  color: #3f4e65;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-figma-beige:hover {
+  background-color: #e6edd3;
+}
+
+.btn-figma-danger {
+  background-color: #e55353;
+  border: none;
+  color: #ffffff;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-figma-danger:hover {
+  background-color: #d44c4c;
 }
 
 /* Buttons */
@@ -677,5 +807,50 @@ const handleExport = (e) => {
 
 :deep(.dx-header-filter) {
   color: #f26f21 !important;
+}
+
+/* Refined Filter Styling */
+.filter-container {
+  background-color: #ffffff;
+  border: 1px solid #eef0f3;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.refined-select {
+  border-radius: 6px;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.refined-select :deep(.dx-texteditor-input) {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #3f4e65;
+  font-weight: 400;
+}
+
+.refined-select :deep(.dx-texteditor-container) {
+  border: 1px solid #d1d6dc;
+  border-radius: 6px;
+}
+
+.refined-select.dx-state-hover :deep(.dx-texteditor-container) {
+  border-color: #bcbfc4;
+}
+
+.refined-select.dx-state-focused :deep(.dx-texteditor-container) {
+  border-color: #f26f21;
+}
+
+.refined-select :deep(.dx-placeholder) {
+  color: #8a96a3;
+}
+
+.refined-select :deep(.dx-dropdowneditor-icon) {
+  color: #3f4e65;
 }
 </style>

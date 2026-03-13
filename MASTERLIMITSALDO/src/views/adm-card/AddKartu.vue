@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { apiSelf } from '@/helper/ourAxios'
+import Swal from 'sweetalert2'
 
+const router = useRouter()
 const props = defineProps({ 
   titleProject: { type: String, default: 'Tambah Kartu' }, 
   user: String 
@@ -22,28 +25,28 @@ const formData = ref({
 
 const handleSimpan = async () => {
   try {
-    const response = await apiSelf.post('/api/petty-cash/create', formData.value)
-    
-    if (response.data && response.status === 200) {
-      alert("Data berhasil disimpan!")
-      // Reset form
-      formData.value = {
-        npk: '',
-        namaPic: '',
-        department: '',
-        divisi: '',
-        nomorRekening: '',
-        namaBank: '',
-        expiredDate: '',
-        limitSaldo: '',
-        tipeKartu: 'Card',
-        status: 'Active'
-      }
-    } else {
-      alert("Gagal menyimpan data ke server!")
+    // simpan data dummy
+    const result = await Swal.fire({
+      title: 'Berhasil!',
+      text: 'Data berhasil disimpan.',
+      icon: 'success',
+      confirmButtonColor: '#f26f21',
+    });
+
+    if (result.isConfirmed) {
+      router.push('/');
     }
+
+    /*
+    // API
+    const response = await apiSelf.post('/api/petty-cash/create', formData.value)
+    if (response.data && response.status === 200) {
+      await Swal.fire('Berhasil!', 'Data berhasil disimpan!', 'success')
+      router.push('/')
+    }
+    */
   } catch (error) {
-    alert("Error: " + error.message)
+    Swal.fire('Error!', error.message, 'error')
   }
 }
 
@@ -73,6 +76,10 @@ const handleCancel = () => {
               <option value="100234">100234</option>
               <option value="100235">100235</option>
               <option value="100236">100236</option>
+              <option value="100248">100248</option>
+              <option value="100249">100249</option>
+              <option value="100250">100250</option>
+              <option value="100251">100251</option>
             </select>
           </div>
           <div class="col-md-3">
