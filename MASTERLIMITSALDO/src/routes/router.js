@@ -21,7 +21,7 @@ const routes = [
       name: 'AddKartu',
       component: AddKartu,
       props: (route) => ({
-        titleProject: 'Tambah Kartu',
+        titleProject: 'Buat Kartu Baru',
         user: route.query.user
       })
     },
@@ -30,7 +30,7 @@ const routes = [
       name: 'EditKartu',
       component: EditKartu,
       props: (route) => ({
-        titleProject: 'Edit Kartu',
+        titleProject: 'Edit Kartu Petty Cash',
         id: route.params.id,
         user: route.query.user
       })

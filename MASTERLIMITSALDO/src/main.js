@@ -3,6 +3,7 @@ import "./assets/css/dx.material.custom-mpm.css";
 import "./assets/css/custom.css";
 import "devextreme/dist/css/dx.light.css";
 import "./assets/css/app.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 import config from "devextreme/core/config";
 config({ licenseKey: import.meta.env.VITE_LICENSE_KEY_DEVEXTREME });

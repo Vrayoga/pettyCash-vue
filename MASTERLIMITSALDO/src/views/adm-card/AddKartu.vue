@@ -70,9 +70,9 @@ const handleCancel = () => {
         <!-- R1 -->
         <div class="row g-4 mb-4">
           <div class="col-md-3">
-            <label class="form-label text-muted small fw-medium mb-1">NPK</label>
+            <label class="form-label text-muted small fw-medium mb-1">PIC</label>
             <select v-model="formData.npk" class="form-select form-select-sm custom-input">
-              <option value="" disabled>Pilih NPK</option>
+              <option value="" disabled>Pilih PIC</option>
               <option value="100234">100234</option>
               <option value="100235">100235</option>
               <option value="100236">100236</option>
@@ -81,10 +81,6 @@ const handleCancel = () => {
               <option value="100250">100250</option>
               <option value="100251">100251</option>
             </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label text-muted small fw-medium mb-1">Nama PIC</label>
-            <input type="text" v-model="formData.namaPic" class="form-control form-control-sm custom-input" placeholder="">
           </div>
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Department</label>
@@ -103,21 +99,21 @@ const handleCancel = () => {
             <input type="text" v-model="formData.nomorRekening" class="form-control form-control-sm custom-input" placeholder="Masukkan Nomor Rekening">
           </div>
           <div class="col-md-3">
+            <label class="form-label text-muted small fw-medium mb-1">Nama Rekening</label>
+            <input type="text" v-model="formData.namaRekening" class="form-control form-control-sm custom-input" placeholder="Masukkan Nama ekening">
+          </div>
+          <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Nama Bank</label>
             <input type="text" v-model="formData.namaBank" class="form-control form-control-sm custom-input" placeholder="Masukkan Nama Bank">
           </div>
           <div class="col-md-3">
-            <label class="form-label text-muted small fw-medium mb-1">Expired Date</label>
+            <label class="form-label text-muted small fw-medium mb-1">Tanggal Kedaluwarsa</label>
             <input type="date" v-model="formData.expiredDate" class="form-control form-control-sm custom-input" placeholder="mm/yyyy">
           </div>
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Limit Saldo</label>
             <input type="text" v-model="formData.limitSaldo" class="form-control form-control-sm custom-input" placeholder="Masukkan Limit Saldo">
           </div>
-        </div>
-
-        <!-- R3 -->
-        <div class="row g-4 mb-5">
           <div class="col-md-3">
             <label class="form-label text-muted small fw-medium mb-1">Tipe Kartu</label>
             <select v-model="formData.tipeKartu" class="form-select form-select-sm custom-input">
@@ -125,15 +121,7 @@ const handleCancel = () => {
               <option value="Non Card">Non Card</option>
             </select>
           </div>
-          <div class="col-md-3">
-            <label class="form-label text-muted small fw-medium mb-1">Status</label>
-            <select v-model="formData.status" class="form-select form-select-sm custom-input">
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
         </div>
-
         <!-- Buttons -->
         <div class="d-flex gap-2">
           <button class="btn btn-warning text-white px-4 custom-modal-btn" style="background-color: #f26f21; border-color: #f26f21;" @click="handleSimpan">Simpan</button>
@@ -163,8 +151,11 @@ const handleCancel = () => {
 
 .custom-input {
   border: 1px solid #ddd;
-  border-radius: 0.25rem;
+  border-radius: 7px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
+
 
 .custom-modal-btn {
   font-weight: 500;
